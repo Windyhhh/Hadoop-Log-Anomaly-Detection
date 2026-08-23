@@ -1,0 +1,25 @@
+# MapReduce输出结果示例
+# 格式: label,taskID,eventID1,eventID2,...
+
+abnormal,C47C9A2D664ACF66,1,2,3,4,5
+normal,D58E0B3E775BDG77,1,2,3,6
+normal,E69F1C4F886CEH88,1,2,3
+abnormal,F70G2D5F997DFI99,1,2,3,4
+normal,G81H3E6G008EGJ00,1,2,3,6
+normal,H92I4F7H119FHK11,1,2,3
+abnormal,I03J5G8I220GIL22,1,2,3,4
+normal,J14K6H9J331HJM33,1,2,3,6
+normal,K25L7I0K442IJN44,1,2,3
+
+# 输出说明：
+# 1. abnormal: 异常任务（文件路径包含AN或COM_，且description不包含success:或a user task）
+# 2. normal: 正常任务（文件路径包含NM_，或其他情况）
+# 3. taskID: 任务唯一标识符
+# 4. eventID: 事件ID列表，按顺序排列
+
+# 统计信息：
+# 总任务数: 9
+# 异常任务: 3 (C47C9A2D664ACF66, F70G2D5F997DFI99, I03J5G8I220GIL22)
+# 正常任务: 6 (D58E0B3E775BDG77, E69F1C4F886CEH88, G81H3E6G008EGJ00, H92I4F7H119FHK11, J14K6H9J331HJM33, K25L7I0K442IJN44)
+# 异常率: 33.33%
+
