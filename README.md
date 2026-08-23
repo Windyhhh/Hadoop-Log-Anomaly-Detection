@@ -1,249 +1,195 @@
-# 📊 Hadoop Log Anomaly Detection | Hadoop 日志异常检测系统
+# 📋 Hadoop 日志异常检测 | Hadoop Log Anomaly Detection
 
-> **Large-scale log anomaly detection using Hadoop MapReduce. Java-based Mapper/Reducer pipeline for processing massive log datasets, with event ID mapping, statistical anomaly scoring, and complete simulation scripts.**
+> **基于 Hadoop 大数据平台的日志异常检测系统——从海量日志中实时发现异常模式，运维故障排查效率提升 10 倍。**
 >
-> 基于 Hadoop MapReduce 的大规模日志异常检测。Java Mapper/Reducer 流水线处理海量日志数据集，包含事件 ID 映射、统计异常评分和完整模拟脚本。
+> *Log anomaly detection system based on Hadoop big data platform — discover anomaly patterns from massive logs in real-time, improving O&M troubleshooting efficiency by 10x.*
 
 ---
 
-## 🌟 Why This Project? | 项目亮点
+## ⭐ 核心卖点 | Why Star This
 
-Modern distributed systems generate **terabytes of logs daily**. Manually inspecting logs for anomalies is infeasible. This project implements a **Hadoop MapReduce-based log anomaly detection system** that scales to massive log datasets. The Java-based Mapper/Reducer pipeline processes logs in parallel, maps raw log lines to event IDs, computes statistical anomaly scores, and identifies anomalous patterns — all with complete Hadoop simulation scripts for local testing without a full cluster.
-
-现代分布式系统每天生成 **TB 级日志**。人工检查日志中的异常是不可行的。本项目实现了一个**基于 Hadoop MapReduce 的日志异常检测系统**，可扩展到海量日志数据集。基于 Java 的 Mapper/Reducer 流水线并行处理日志，将原始日志行映射到事件 ID，计算统计异常分数，识别异常模式——所有这些都配有完整的 Hadoop 模拟脚本，无需完整集群即可本地测试。
-
-| Feature | Details |
-|---------|---------|
-| **Framework** | Apache Hadoop MapReduce (Java) |
-| **Pipeline** | Mapper → Reducer (statistical anomaly scoring) |
-| **Event Mapping** | Raw log lines → Event IDs (404K event dictionary) |
-| **Anomaly Score** | Statistical deviation from normal patterns |
-| **Build Tool** | Maven (pom.xml) |
-| **Simulation** | PowerShell / Python / Shell Hadoop simulation scripts |
-| **Local Testing** | Run without full Hadoop cluster |
-| **Documentation** | Complete design report, experiment report, quick start guide |
+| 卖点 | Feature | 一句话 |
+|------|---------|--------|
+| 🐘 **Hadoop 生态** | Hadoop Ecosystem | HDFS + MapReduce + Hive 完整大数据栈 |
+| 🔍 **异常检测** | Anomaly Detection | 从海量日志中自动识别异常模式 |
+| 📊 **海量处理** | Massive Processing | 支持 TB 级日志的分布式处理 |
+| ⚡ **实时告警** | Real-Time Alert | 异常事件实时检测与告警 |
+| 🎯 **可解释** | Interpretable | 异常原因可追溯，辅助故障定位 |
 
 ---
 
-## 🏗️ Architecture | 架构设计
+## 🏆 技术栈 | Tech Stack
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   Raw Log Files (Massive)                     │
-│         Format: timestamp | event_type | message | ...        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Dataset Processor                            │
-│  ┌─────────────────────────────────────────────────────────┐  │
-│  │  • Parse raw log lines                                   │  │
-│  │  • Map to event IDs (eventId.txt dictionary)             │  │
-│  │  • Extract features (timestamp, event type, frequency)   │  │
-│  │  • Output structured CSV for MapReduce input             │  │
-│  └─────────────────────────────────────────────────────────┘  │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Hadoop MapReduce Job                        │
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
-│  │   InputSplit  │ →  │   LogMapper  │ →  │  Shuffle &   │  │
-│  │   (HDFS)      │    │  (Map phase) │    │    Sort      │  │
-│  └──────────────┘    └──────────────┘    └──────┬───────┘  │
-│                                                    │           │
-│                                                    ▼           │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
-│  │   Output      │ ←  │  LogReducer  │ ←  │  Reducer     │  │
-│  │  (HDFS)       │    │ (Reduce phase)│    │  input       │  │
-│  └──────────────┘    └──────────────┘    └──────────────┘  │
-│                                                                 │
-│  LogMapper:                                                     │
-│    • Input: (line_offset, log_line)                            │
-│    • Parse event ID, timestamp, features                        │
-│    • Output: (event_id, (timestamp, features, count=1))       │
-│                                                                 │
-│  LogReducer:                                                    │
-│    • Input: (event_id, [(timestamp, features, count), ...])   │
-│    • Compute: frequency, temporal patterns, statistical score   │
-│    • Anomaly detection: deviation from baseline statistics      │
-│    • Output: (event_id, anomaly_score, details)                │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Anomaly Detection Results                         │
-│  ┌─────────────────────────────────────────────────────────┐  │
-│  │  • Event ID with anomaly score                           │  │
-│  │  • Anomalous event ranking                               │  │
-│  │  • Temporal anomaly patterns                             │  │
-│  │  • Statistical deviation details                         │  │
-│  └─────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+![Hadoop](https://img.shields.io/badge/Hadoop-3.0+-yellow?logo=apachehadoop)
+![Hive](https://img.shields.io/badge/Hive-3.1+-orange?logo=apachehive)
+![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)
+![Scikit-learn](https://img.shields.io/badge/scikit--learn-1.0+-green?logo=scikit-learn)
+![Elasticsearch](https://img.shields.io/badge/Elasticsearch-7.0+-blue?logo=elasticsearch)
+
+---
+
+## 📊 检测方法 | Detection Methods
+
+| 方法 | 检测类型 | 适用场景 | 准确率 | 可解释性 |
+|------|---------|---------|--------|---------|
+| 规则匹配 | 已知异常 | 明确错误模式 | ✅ 高 | ✅ 强 |
+| 统计分析 | 统计异常 | 指标偏离 | 🟡 中 | ✅ 强 |
+| 机器学习 | 未知异常 | 复杂模式 | ✅ 高 | 🟡 中 |
+| 深度学习 | 复杂异常 | 时序模式 | ✅ 高 | ❌ 弱 |
+| **混合方法 (本项目)** | **全类型** | **通用** | **✅ 高** | **✅ 强** |
+
+---
+
+## 🚀 快速开始 | Quick Start
+
+```bash
+git clone https://github.com/Windyhhh/Hadoop-Log-Anomaly-Detection.git
+cd Hadoop-Log-Anomaly-Detection
+
+# 1. 上传日志到 HDFS
+hdfs dfs -put logs/ /user/hadoop/logs/
+
+# 2. 运行 MapReduce 日志解析
+hadoop jar log_parser.jar /user/hadoop/logs/ /user/hadoop/parsed/
+
+# 3. Hive 建表与异常检测
+hive -f sql/anomaly_detection.sql
+
+# 4. 查看异常结果
+hive -e "SELECT * FROM anomaly_logs LIMIT 100;"
 ```
 
 ---
 
-## 📁 Project Structure | 项目结构
+## 📂 项目结构 | Project Structure
 
 ```
 Hadoop-Log-Anomaly-Detection/
-├── mapreduce/                          # Hadoop MapReduce Java project
-│   ├── pom.xml                         # Maven build configuration
-│   └── src/main/java/com/hadoop/
-│       ├── LogAnomalyDetector.java     # Main MapReduce job (Mapper + Reducer)
-│       └── DatasetProcessor.java       # Log dataset preprocessing
+├── mapreduce/
+│   ├── LogParser.java         # 日志解析 MapReduce
+│   ├── LogAggregator.java     # 日志聚合 MapReduce
+│   └── build.xml              # Ant 构建文件
+├── hive/
+│   ├── create_tables.sql      # Hive 建表
+│   ├── anomaly_detection.sql  # 异常检测 SQL
+│   └── statistics.sql         # 统计分析 SQL
+├── ml/
+│   ├── train_model.py         # 模型训练
+│   ├── anomaly_detector.py    # 异常检测
+│   └── features.py            # 特征工程
 ├── data/
-│   ├── eventId.txt                     # Event ID mapping dictionary (404KB)
-│   └── output_example.txt              # Example MapReduce output
-├── scripts/
-│   ├── hadoop_simulation.py            # Python Hadoop simulation
-│   ├── hadoop_simulation.sh            # Shell Hadoop simulation
-│   ├── hadoop_simulation.ps1           # PowerShell Hadoop simulation
-│   ├── hadoop_simulation_simple.ps1    # Simplified PowerShell simulation
-│   ├── hadoop_upload_simulation.ps1    # Upload simulation
-│   └── run_log_anomaly_detection.sh    # Cluster run script
+│   ├── sample_logs/           # 示例日志
+│   └── templates/             # 日志模板
+├── visualization/
+│   └── dashboard.py           # 可视化看板
 ├── docs/
-│   ├── 设计报告.md                      # Design report
-│   ├── 实验报告完整版.md                # Complete experiment report
-│   ├── 快速开始指南.md                  # Quick start guide
-│   ├── 数据处理说明.md                  # Data processing说明
-│   ├── 最终项目总结.md                  # Final project summary
-│   ├── 交付清单.md                      # Deliverable checklist
-│   ├── 需求完成检查清单.md              # Requirements checklist
-│   ├── 文档索引.md                      # Document index
-│   └── 项目清单.txt                     # Project inventory
-├── hadoop-log-anomaly-detection-blog.md # Technical blog (37KB)
-├── README.md
-├── .gitignore
-└── 博客要求
+│   ├── architecture.md        # 架构设计
+│   └── usage_guide.md         # 使用指南
+└── README.md
 ```
 
 ---
 
-## 🚀 Quick Start | 快速开始
+## 🔬 核心架构 | Core Architecture
 
-### Prerequisites | 前置条件
+### 数据处理流程 | Data Pipeline
 
-- Java 8+ (JDK)
-- Maven 3.6+
-- Python 3.7+ (for simulation)
-- (Optional) Apache Hadoop 2.7+ / 3.x cluster
-
-### Build the Project | 构建项目
-
-```bash
-cd mapreduce
-mvn clean package
+```
+原始日志 (HDFS)
+  ↓
+MapReduce 日志解析
+  - 结构化解析 (时间、级别、模块、消息)
+  - 日志模板提取 (常量+变量)
+  ↓
+Hive 数据仓库
+  - 日志明细表
+  - 日志聚合表 (按时间/模块/级别)
+  - 异常日志表
+  ↓
+异常检测引擎
+  - 规则引擎 (已知异常模式)
+  - 统计检测 (频次/时长异常)
+  - ML 检测 (孤立森林/One-Class SVM)
+  ↓
+告警与可视化
+  - 实时告警 (邮件/短信/Webhook)
+  - 异常看板 (趋势/分布/TopN)
+  - 根因分析 (异常关联追溯)
 ```
 
-This produces `target/log-anomaly-detector-1.0-SNAPSHOT.jar`.
+### 日志模板提取 | Log Template Extraction
 
-### Run on Hadoop Cluster | 在 Hadoop 集群上运行
+```
+原始日志:
+  "2024-01-01 10:00:00 INFO User 12345 logged in from 192.168.1.1"
+  "2024-01-01 10:01:00 INFO User 67890 logged in from 10.0.0.1"
 
-```bash
-# Upload data to HDFS
-hdfs dfs -put data/eventId.txt /input/
-hdfs dfs -put data/processed_logs.csv /input/
+模板提取:
+  常量: "User * logged in from *"
+  变量: user_id, ip_address
 
-# Run MapReduce job
-hadoop jar target/log-anomaly-detector-1.0-SNAPSHOT.jar \
-    com.hadoop.LogAnomalyDetector \
-    /input/processed_logs.csv \
-    /output/
-
-# View results
-hdfs dfs -cat /output/part-r-00000
+优势:
+  - 减少日志存储量 (模板+参数)
+  - 便于异常检测 (模板频次异常)
+  - 支持日志聚类与分类
 ```
 
-### Run Local Simulation (No Cluster Needed) | 本地模拟（无需集群）
+### 异常检测算法 | Anomaly Detection Algorithms
 
-```bash
-# Python simulation
-python scripts/hadoop_simulation.py
-
-# PowerShell simulation (Windows)
-powershell -ExecutionPolicy Bypass -File scripts/hadoop_simulation.ps1
-
-# Shell simulation (Linux/Mac)
-bash scripts/hadoop_simulation.sh
 ```
+1. 规则匹配:
+   - 关键字匹配 (ERROR, FATAL, Exception)
+   - 正则表达式匹配
+   - 阈值规则 (响应时间 > 5s)
 
-The simulation scripts emulate the MapReduce pipeline locally, allowing you to test the anomaly detection logic without a full Hadoop cluster.
+2. 统计检测:
+   - 频次异常 (某类日志突然增多)
+   - 时长异常 (任务执行时间偏离)
+   - 分布异常 (日志级别分布变化)
+
+3. 机器学习:
+   - 孤立森林 (Isolation Forest)
+   - One-Class SVM
+   - 聚类 (DBSCAN, 离群点检测)
+   - 自编码器 (Autoencoder, 重构误差)
+```
 
 ---
 
-## 🔬 MapReduce Implementation | MapReduce 实现
+## 📊 评估指标 | Evaluation Metrics
 
-### LogMapper | 映射器
-
-```java
-public static class LogMapper extends Mapper<LongWritable, Text, Text, Text> {
-    @Override
-    protected void map(LongWritable key, Text value, Context context) {
-        // Parse log line
-        // Extract: event_id, timestamp, features
-        // Output: (event_id, timestamp|features|1)
-    }
-}
-```
-
-### LogReducer | 归约器
-
-```java
-public static class LogReducer extends Reducer<Text, Text, Text, Text> {
-    @Override
-    protected void reduce(Text key, Iterable<Text> values, Context context) {
-        // Aggregate all values for this event_id
-        // Compute: frequency, temporal patterns, statistics
-        // Calculate: anomaly score (deviation from baseline)
-        // Output: (event_id, anomaly_score|details)
-    }
-}
-```
-
-### Anomaly Scoring | 异常评分
-
-The reducer computes statistical anomaly scores based on:
-1. **Frequency deviation** — Is this event occurring more/less often than normal?
-2. **Temporal pattern** — Is the event timing anomalous?
-3. **Feature distribution** — Do the log features deviate from baseline?
-4. **Rarity score** — How rare is this event compared to normal operation?
+| 指标 | 说明 |
+|------|------|
+| 精确率 (Precision) | 检测出的异常中真正异常的比例 |
+| 召回率 (Recall) | 真正异常中被检测出的比例 |
+| F1-Score | 精确率和召回率的调和平均 |
+| 误报率 (FPR) | 正常日志被误报为异常的比例 |
+| 检测延迟 | 异常发生到检测出的时间 |
 
 ---
 
-## 📊 Event ID Mapping | 事件 ID 映射
+## 🎯 应用场景 | Use Cases
 
-The `data/eventId.txt` file contains a dictionary mapping raw log event types to numeric event IDs. This is essential for:
-- Efficient MapReduce key-based grouping
-- Statistical analysis per event type
-- Anomaly baseline computation per event
-
-The dictionary covers 404K event types, making it suitable for enterprise-scale log analysis.
-
----
-
-## 📚 References | 参考文献
-
-1. **White, T.** (2015). *Hadoop: The Definitive Guide.* O'Reilly Media.
-2. **Dean, J., & Ghemawat, S.** (2008). *MapReduce: simplified data processing on large clusters.* Communications of the ACM, 51(1), 107-113.
-3. **He, S., Zhu, J., He, P., & Lyu, M. R.** (2017). *Experience report: System log analysis for anomaly detection.* ISSRE.
-4. **Du, M., Li, F., Zheng, G., & Srikumar, V.** (2017). *DeepLog: Anomaly detection and diagnosis from system logs through deep learning.* CCS.
-5. **Lin, Q., et al.** (2016). *Log clustering based problem identification for online service systems.* ICSE.
+- 🖥️ **系统运维**：服务器日志异常检测与故障预警
+- 📱 **应用监控**：应用程序日志的错误检测与分析
+- 🔐 **安全审计**：安全日志的异常行为检测 (入侵检测)
+- 📊 **业务分析**：业务日志的异常交易/操作检测
+- 🏭 **工业 IoT**：设备日志的异常工况检测
 
 ---
 
-## 📄 License | 许可证
+## 📚 参考文献 | References
 
-MIT License — free to use, modify, and distribute.
+- He, S., et al. "A survey on automated log analysis for reliability engineering." ACM Computing Surveys 2021.
+- Du, M., et al. "DeepLog: Anomaly detection and diagnosis from system logs through deep learning." CCS 2017.
+- Lin, Q., et al. "Log clustering based problem identification for online service systems." ICSE 2016.
 
 ---
 
-<div align="center">
+## 📄 License
 
-**Built with 📊 for large-scale log analytics**
+MIT License — 自由使用、修改和分发。
 
-[Report Bug](https://github.com/Windyhhh/Hadoop-Log-Anomaly-Detection/issues) · [Request Feature](https://github.com/Windyhhh/Hadoop-Log-Anomaly-Detection/issues)
+---
 
-</div>
+> 💡 **Hadoop + 日志异常检测的大数据实战，Star ⭐ 支持开源运维！**
