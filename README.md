@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📉 Hadoop-Log-Anomaly-Detection
+# 日志异常检测 | Hadoop-Log-Anomaly-Detection
 
 ### MapReduce-based log anomaly detection on HDFS logs.
 
